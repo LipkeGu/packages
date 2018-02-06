@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2015 OpenWrt.org
+# Copyright (C) 2018 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,13 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tvheadend
-PKG_VERSION:=4.0.9
+PKG_VERSION:=4.2.1
 PKG_RELEASE:=1
 
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_MIRROR_HASH:=c18e3803d6e36348442ccf3b0ac4868948692491c7dd646d48576f5aec09cdd8
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/tvheadend/tvheadend.git
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
@@ -35,7 +34,7 @@ define Package/tvheadend
   TITLE:=Tvheadend is a TV streaming server for Linux
   DEPENDS:=+libopenssl +librt +zlib +TVHEADEND_AVAHI_SUPPORT:libavahi-client $(ICONV_DEPENDS)
   URL:=https://tvheadend.org
-  MAINTAINER:=Jan Čermák <jan.cermak@nic.cz>
+  MAINTAINER:=Jan Cerm�k <jan.cermak@nic.cz>
 endef
 
 define Package/tvheadend/description
@@ -51,6 +50,14 @@ define Package/tvheadend/config
   source "$(SOURCE)/Config.in"
   endmenu
 endef
+
+ifeq ($(CONFIG_TVHEADEND_SATIP_SUPPORT),)
+  CONFIGURE_ARGS += --disable-satip_server --disable-satip_client
+endif
+
+ifeq ($(CONFIG_TVHEADEND_HDHOMERUN_SUPPORT),)
+  CONFIGURE_ARGS += --disable-hdhomerun_client
+endif
 
 ifeq ($(CONFIG_TVHEADEND_CWC_SUPPORT),)
   CONFIGURE_ARGS += --disable-cwc
@@ -74,7 +81,12 @@ CONFIGURE_ARGS += \
 	--arch=$(ARCH) \
 	--disable-dbus_1 \
 	--disable-libav \
-	--enable-bundle
+	--disable-bundle \
+	--disable-trace \
+	--disable-ffmpeg_static \
+	--disable-libvpx_static \
+	--disable-libvorbis_static \
+	--disable-libtheora_static
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -92,8 +104,7 @@ define Package/tvheadend/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/tvheadend.config $(1)/etc/config/tvheadend
 
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build.linux/tvheadend $(1)/usr/bin/
+	$(MAKE) -C $(PKG_BUILD_DIR) install DESTDIR=$(1)
 endef
 
 $(eval $(call BuildPackage,tvheadend))

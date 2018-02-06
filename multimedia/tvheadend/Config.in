@@ -1,10 +1,10 @@
 config TVHEADEND_CWC_SUPPORT
-	bool "NewCamd support"
-	default y
+	bool "CWC support"
+	default n
 
 config TVHEADEND_LINUXDVB_SUPPORT
 	bool "Linux DVB support"
-	default y
+	default n
 
 config TVHEADEND_DVBSCAN_SUPPORT
 	bool "Fetch DVB-scan data"
@@ -15,3 +15,16 @@ config TVHEADEND_AVAHI_SUPPORT
 	bool "Avahi client support"
 	select PACKAGE_libavahi-client
 	default n
+
+config TVHEADEND_SATIP_SUPPORT
+	bool "SAT->IP support"
+	default n
+
+config TVHEADEND_TIMESHIFT_SUPPORT
+	bool "Timeshift support"
+	default y
+
+config TVHEADEND_HDHOMERUN_SUPPORT
+	bool "HDHomeRun support"
+	default n
+
